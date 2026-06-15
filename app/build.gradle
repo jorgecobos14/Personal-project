@@ -1,0 +1,20 @@
+plugins { id 'com.android.application' }
+
+android {
+    compileSdk 34
+    namespace 'com.gta.engine'
+    defaultConfig {
+        applicationId 'com.gta.engine'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '0.1'
+        externalNativeBuild {
+            cmake { cppFlags '-std=c++17' }
+        }
+        ndk { abiFilters 'arm64-v8a' }
+    }
+    externalNativeBuild {
+        cmake { path 'src/main/cpp/CMakeLists.txt' }
+    }
+}
