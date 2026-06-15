@@ -36,7 +36,7 @@ echo "=== Compilando Java ==="
 $JAVAC -source 8 -target 8 \
     -classpath $ANDROID_JAR \
     -d $BUILD/obj \
-    $BUILD/gen/$PKG/R.java \
+    $BUILD/gen/com/gta/engine/R.java \
     $PROJECT/app/src/main/java/$PKG/*.java
 
 echo "=== Dex ==="
