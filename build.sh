@@ -1,22 +1,27 @@
 #!/bin/bash
 set -e
 
-PROJECT=~/GTAEngine
+PROJECT=$(pwd)
 BUILD=$PROJECT/build
 TOOLZ=$PROJECT/toolz
 ANDROID_JAR=$TOOLZ/android.jar
 PKG=com.gta.engine
-APP_NAME="GTAEngine"
+
+# Usar aapt2 del sistema o del PATH
+AAPT2=${AAPT2:-aapt2}
+D8=${D8:-d8}
+APKSIGNER=${APKSIGNER:-apksigner}
+JAVAC=${JAVAC:-javac}
 
 mkdir -p $BUILD/obj $BUILD/gen $BUILD/apk
 
 echo "=== Compilando recursos ==="
-aapt2 compile \
+$AAPT2 compile \
     $PROJECT/app/src/main/res/layout/activity_main.xml \
     -o $BUILD/obj/
 
 echo "=== Linking APK ==="
-aapt2 link \
+$AAPT2 link \
     -o $BUILD/apk/unsigned.apk \
     -I $ANDROID_JAR \
     --manifest $PROJECT/app/src/main/AndroidManifest.xml \
@@ -28,20 +33,24 @@ aapt2 link \
     --version-name "0.1"
 
 echo "=== Compilando Java ==="
-javac -source 8 -target 8 \
+$JAVAC -source 8 -target 8 \
     -classpath $ANDROID_JAR \
     -d $BUILD/obj \
     $BUILD/gen/$PKG/R.java \
     $PROJECT/app/src/main/java/$PKG/*.java
 
 echo "=== Dex ==="
-d8 --output $BUILD/apk/ $BUILD/obj/**/*.class
+$D8 --output $BUILD/apk/ $BUILD/obj/com/gta/engine/*.class
 
-echo "=== Agregando dex al APK ==="
-cd $BUILD/apk && zip unsigned.apk classes.dex
+echo "=== Agregando dex y libs al APK ==="
+cd $BUILD/apk
+zip unsigned.apk classes.dex
 
-echo "=== Compilando C++ ==="
-# TODO: compilar .so con clang
+# Agregar .so si existe
+if [ -d "$PROJECT/app/src/main/jniLibs" ]; then
+    cd $PROJECT
+    zip -r $BUILD/apk/unsigned.apk app/src/main/jniLibs/
+fi
 
 echo "=== Firmando ==="
 if [ ! -f $TOOLZ/debug.keystore ]; then
@@ -50,7 +59,7 @@ if [ ! -f $TOOLZ/debug.keystore ]; then
         -dname "CN=Debug,O=GTA,C=MX" -storepass android -keypass android
 fi
 
-apksigner sign \
+$APKSIGNER sign \
     --ks $TOOLZ/debug.keystore \
     --ks-pass pass:android \
     --key-pass pass:android \
@@ -59,5 +68,3 @@ apksigner sign \
 
 echo "=== APK listo ==="
 ls -lh $BUILD/apk/GTAEngine.apk
-cp $BUILD/apk/GTAEngine.apk ~/storage/downloads/
-echo "Copiado a Downloads"
