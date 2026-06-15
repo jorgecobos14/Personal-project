@@ -49,7 +49,7 @@ zip unsigned.apk classes.dex
 # Agregar .so si existe
 if [ -d "$PROJECT/app/src/main/jniLibs" ]; then
     cd $PROJECT
-    zip -r $BUILD/apk/unsigned.apk app/src/main/jniLibs/
+    mkdir -p lib/arm64-v8a && cp app/src/main/jniLibs/arm64-v8a/libgta_engine.so lib/arm64-v8a/ && zip -r $BUILD/apk/unsigned.apk lib/
 fi
 
 echo "=== Firmando ==="
