@@ -37,7 +37,7 @@ $JAVAC -source 8 -target 8 \
     -classpath $ANDROID_JAR \
     -d $BUILD/obj \
     $BUILD/gen/com/gta/engine/R.java \
-    $PROJECT/app/src/main/java/$PKG/*.java
+    $PROJECT/app/src/main/java/com/gta/engine/*.java
 
 echo "=== Dex ==="
 $D8 --output $BUILD/apk/ $BUILD/obj/com/gta/engine/*.class
